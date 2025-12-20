@@ -19,15 +19,19 @@ Cliente → Go API (QR + JWT) → Node API (Stats) → Respuesta completa
 ### Go API (`go-api/`)
 API principal construida con Fiber v2. Implementa arquitectura hexagonal para mantener la lógica de negocio separada. Usa JWT para autenticación.
 
+**📚 Documentación:** [http://localhost:8080/api-docs/index.html](http://localhost:8080/api-docs/index.html)
+
 **Endpoints:**
-- `POST /login` - Login para obtener token
-- `POST /process` - Envía una matriz, la factoriza y devuelve todo (necesitas el token)
+- `POST /api/v1/auth/login` - Login para obtener token JWT
+- `POST /api/v1/matrix/process` - Factorización QR de matrices (requiere JWT)
 
 ### Node API (`node-api/`)
-Servicio secundario en Express + TypeScript. Se encarga solo de calcular estadísticas de las matrices Q y R que vienen de Go.
+Servicio secundario en Express + TypeScript. Calcula estadísticas de las matrices Q y R.
+
+**📚 Documentación:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
 **Endpoints:**
-- `POST /api/stats` - Recibe matrices y devuelve sus estadísticas
+- `POST /api/stats` - Calcula estadísticas de matrices
 
 ## 🚀 Instalación (con Docker - RECOMENDADO)
 
@@ -43,8 +47,14 @@ cd interseguro-challenge
 
 ### 2. Levantar todo con un solo comando
 ```bash
-docker-compose up --build
-```
+do**Go API:** `http://localhost:8080`
+- **Node API:** `http://localhost:3000`
+
+### 📚 Documentación interactiva (Swagger)
+- **Go API Docs:** [http://localhost:8080/api-docs/index.html](http://localhost:8080/api-docs/index.html)
+- **Node API Docs:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+> 💡 **Tip:** Usa Swagger UI para probar todos los endpoints directamente desde el navegador
 
 **¡Listo!** 🎉 Ambos servicios estarán corriendo:
 - Go API en `http://localhost:8080`
@@ -104,55 +114,41 @@ npm run dev
 ```bash
 cd go-api
 go run cmd/api/main.go
-```
+``` la API
 
-</details>
+### Opción 1: Swagger UI (Recomendado) 🎨
 
----
+La forma más fácil es usar la documentación interactiva de Swagger:
 
-## 💡 Cómo usar
+1. **Levanta los servicios:**
+   ```bash
+   docker-compose up
+   ```
 
-### 1. Obtener token JWT
+2. **Abre Swagger en tu navegador:**
+   - Go API: [http://localhost:8080/api-docs/index.html](http://localhost:8080/api-docs/index.html)
+   - Node API: [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+3. **Prueba los endpoints directamente desde la interfaz** - Swagger te permite ejecutar requests sin usar curl
+
+### Opción 2: Ejemplo rápido con curl
+
+**1. Login:**
 ```bash
-curl -X POST http://localhost:8080/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"password123"}'
 ```
 
-**Respuesta:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-### Procesar una matriz
+**2. Procesar matriz (copia el token del paso anterior):**
 ```bash
-curl -X POST http://localhost:8080/process \
+curl -X POST http://localhost:8080/api/v1/matrix/process \
   -H "Authorization: Bearer <tu-token>" \
   -H "Content-Type: application/json" \
   -d '{"data":[[1,2],[3,4],[5,6]]}'
 ```
 
-**Respuesta:**
-```json
-{
-  "qr_factorization": {
-    "Q": [[0.169, 0.897], [0.507, 0.276], [0.845, -0.345]],
-    "R": [[5.916, 7.437], [0, 0.828]]
-  },
-  "statistics": {
-    "Q": {
-      "avg": 0.392,
-      "min": -0.345,
-      "max": 0.897,
-      "sum": 2.349,
-      "isDiagonal": false
-    },
-    "R": {
-      "avg": 3.545,
-      "min": 0,
-      "max": 7.437,
+> 📖 Para ver todos los ejemplos de request/response, consulta la documentación de Swagger   "max": 7.437,
       "sum": 14.181,
       "isDiagonal": false
     }
@@ -254,19 +250,26 @@ node-api/
 
 - ✅ Arquitectura hexagonal en Go
 - ✅ Comunicación entre microservicios
-- ✅ Autenticación con JWT
-- ✅ Tests unitarios
-- ✅ Dockerizado y listo para producción
-- ✅ Algoritmo de Gram-Schmidt para QR
+- ✅ Autenticacgo-playground/validator/v10` - Validación de datos
+- `github.com/swaggo/fiber-swagger` - Documentación OpenAPI
 
-## 🛑 Detener los servicios
+### Node API
+- `express` - Framework web
+- `typescript` - Tipado estático
+- `joi` - Validación de esquemas
+- `swagger-jsdoc` & `swagger-ui-express` - Documentación OpenAPI
+- `jest` - Testing
 
+##
 Con Docker:
-```bash
-docker-compose down
-```
-
----
-
+```bash(Go) y por capas (Node)
+- ✅ Comunicación entre microservicios
+- ✅ Autenticación JWT con middleware
+- ✅ Validación de datos (go-playground/validator + Joi)
+- ✅ Documentación OpenAPI/Swagger interactiva
+- ✅ Tests unitarios con cobertura
+- ✅ Dockerizado y listo para producción
+- ✅ Versionado de API (v1)
+- ✅ Algoritmo de Gram-Schmidt para factorización
 Proyecto desarrollado para el proceso de selección de Interseguro 🚀
 Proyecto desarrollado para el proceso de selección de Interseguro

@@ -7,11 +7,32 @@ import (
 	"log"
 	"os"
 
+	// _ "challenge-go/docs" // Importa los docs generados por swag (se descomenta después de swag init)
+
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
+// @title           Interseguro Matrix Processing API
+// @version         1.0.0
+// @description     API REST para autenticación JWT y procesamiento de matrices con factorización QR usando algoritmo Gram-Schmidt
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Interseguro API Support
+// @contact.email  support@interseguro.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Token JWT con formato: Bearer {tu_token}
 func main() {
 	// 0. Cargar variables de entorno
 	if err := godotenv.Load(); err != nil {
@@ -45,21 +66,28 @@ func main() {
 	myHandler := handler.NewMatrixHandler(myService)
 	loginHandler := handler.NewLoginHandler(jwtSecret, adminUser, adminPass)
 
-	// 4. RUTAS PÚBLICAS (Login)
-	app.Post("/login", loginHandler)
+	// 4. RUTA SWAGGER (Documentación)
+	app.Get("/api-docs/*", fiberSwagger.WrapHandler)
 
-	// 5. MIDDLEWARE JWT (El guardia de seguridad)
-	app.Use(jwtware.New(jwtware.Config{
+	// 5. Grupo de rutas API v1
+	api := app.Group("/api/v1")
+
+	// 6. RUTAS PÚBLICAS (No requieren autenticación)
+	api.Post("/auth/login", loginHandler)
+
+	// 7. MIDDLEWARE JWT (Protege las rutas siguientes)
+	api.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(jwtSecret)},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(401).JSON(fiber.Map{"error": "Token inválido o expirado"})
 		},
 	}))
 
-	// 6. RUTAS PRIVADAS (Procesar Matriz)
-	app.Post("/process", myHandler.Process)
+	// 8. RUTAS PROTEGIDAS (Requieren JWT)
+	api.Post("/matrix/process", myHandler.Process)
 
-	// 7. Arrancar
+	// 9. Arrancar
 	log.Println("🚀 Go API corriendo en el puerto 8080")
+	log.Println("📚 Swagger UI: http://localhost:8080/api-docs/index.html")
 	log.Fatal(app.Listen(":8080"))
 }

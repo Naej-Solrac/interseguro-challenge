@@ -3,12 +3,18 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
+# Instalar swag CLI para generar documentación
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Copiamos dependencias
 COPY go.mod go.sum ./
 RUN go mod download
 
 # Copiamos el código
 COPY . .
+
+# Generamos documentación Swagger
+RUN swag init -g cmd/api/main.go -o docs
 
 # Compilamos el binario llamado "main"
 RUN go build -o main cmd/api/main.go
