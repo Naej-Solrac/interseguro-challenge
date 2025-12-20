@@ -29,33 +29,45 @@ Servicio secundario en Express + TypeScript. Se encarga solo de calcular estadí
 **Endpoints:**
 - `POST /api/stats` - Recibe matrices y devuelve sus estadísticas
 
-## Instalación
+## 🚀 Instalación (con Docker - RECOMENDADO)
+
+### Requisitos
+- Docker
+- Docker Compose
+
+### 1. Clonar repositorio
+```bash
+git clone https://github.com/Naej-Solcar/interseguro-challenge.git
+cd interseguro-challenge
+```
+
+### 2. Levantar todo con un solo comando
+```bash
+docker-compose up --build
+```
+
+**¡Listo!** 🎉 Ambos servicios estarán corriendo:
+- Go API en `http://localhost:8080`
+- Node API en `http://localhost:3000`
+
+### Credenciales por defecto
+- **Usuario:** `admin`
+- **Password:** `password123`
+
+*(Puedes cambiarlas en el `docker-compose.yml`)*
+
+---
+
+## 📦 Instalación Manual (sin Docker)
+
+<details>
+<summary>Click aquí si prefieres correr sin Docker</summary>
 
 ### Requisitos
 - Go 1.25+
 - Node.js 18+
-- npm o yarn
 
-### 1. Clonar repositorio
-```bash
-git clone https://github.com/Naej-Solrac/interseguro-challenge.git
-cd interseguro-challenge
-```
-
-### Configurar el .env
-
-En la carpeta `go-api/` crea un archivo `.env` con tus credenciales:
-
-```env
-JWT_SECRET=tu_secreto_jwt
-ADMIN_USERNAME=tu_usuario
-ADMIN_PASSWORD=tu_password
-NODE_SERVICE_URL=http://localhost:3000/api
-```
-
-(No subas este archivo a git, ya está en .gitignore)
-
-### Instalar dependencias
+### 1. Instalar dependencias
 
 **Node API:**
 ```bash
@@ -69,9 +81,18 @@ cd go-api
 go mod tidy
 ```
 
-### Correr todo
+### 2. Configurar .env
 
-Necesitas dos terminales:
+En `go-api/` crea un archivo `.env`:
+
+```env
+JWT_SECRET=secreto_para_firmar_tokens
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=password123
+NODE_SERVICE_URL=http://localhost:3000/api
+```
+
+### 3. Correr ambos servicios
 
 **Terminal 1 - Node:**
 ```bash
@@ -85,15 +106,17 @@ cd go-api
 go run cmd/api/main.go
 ```
 
-Ya Cómo usar
+</details>
 
-### Primero necesitas el token
+---
+
+## 💡 Cómo usar
 
 ### 1. Obtener token JWT
 ```bash
 curl -X POST http://localhost:8080/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"TU_USUARIO","password":"TU_PASSWORD"}'
+  -d '{"username":"admin","password":"password123"}'
 ```
 
 **Respuesta:**
@@ -137,23 +160,27 @@ curl -X POST http://localhost:8080/process \
 }
 ```
 
-## Tests
+## 🧪 Tests
 
-Para el servicio de Node:
+**Con Docker:**
 ```bash
-cd node-api
-npm test
+# Node API
+docker-compose exec node-api npm test
+
+# Go API
+docker-compose exec go-api go test ./...
 ```
 
-Para Go:
+**Sin Docker:**
 ```bash
-cd go-api
-go test ./...
+# Node API
+cd node-api && npm test
+
+# Go API
+cd go-api && go test ./...
 ```
 
-LosArquitectura del código
-
-### Go API (Hexagonal
+## 🏗️ Arquitectura del código
 
 ### Go API (Hexagonal/Clean Architecture)
 
@@ -177,7 +204,7 @@ go-api/
 │       │   └── ports.go
 │       └── service/             # Orquestación
 │           └── matrix_service.go
-```Capas
+```
 
 ### Node API (Layered Architecture)
 
@@ -199,15 +226,16 @@ node-api/
 │       └── matrixStats.controller.ts
 ├── jest.config.js
 └── tsconfig.json
-```Cosas de seguridad
+```
 
-- Las credenciales están en el `.env` que no se sube a git
-- El login devuelve un JWT que dura 24 horas
-- El endpoint `/process` está protegido, necesitas el token
+## 🔒 Seguridad
 
-## Tecnologías usadmínimo privilegio
+- JWT con expiración de 24 horas
+- Endpoint `/process` protegido con token
+- Las credenciales se configuran en variables de entorno
+- Arquitectura de microservicios con red privada en Docker
 
-##  Tecnologías
+## 🛠️ Tecnologías
 
 ### Go API
 - `github.com/gofiber/fiber/v2` - Framework web
@@ -218,16 +246,27 @@ node-api/
 - `express` - Framework web
 - `typescript` - Tipado estático
 - `jest` - Testing
+# DevOps
+- `Docker` & `Docker Compose` - Containerización
+- Multi-stage builds para optimizar imágenes
 
-##  Habilidades Demostradas
-Lo que incluye el proyecto
+## ✨ Características
 
-- Arquitectura hexagonal en Go (más fácil de testear y mantener)
-- Comunicación entre microservicios
-- Autenticación con JWT
-- Tests unitarios
-- Algoritmo de Gram-Schmidt para QR
+- ✅ Arquitectura hexagonal en Go
+- ✅ Comunicación entre microservicios
+- ✅ Autenticación con JWT
+- ✅ Tests unitarios
+- ✅ Dockerizado y listo para producción
+- ✅ Algoritmo de Gram-Schmidt para QR
+
+## 🛑 Detener los servicios
+
+Con Docker:
+```bash
+docker-compose down
+```
 
 ---
 
+Proyecto desarrollado para el proceso de selección de Interseguro 🚀
 Proyecto desarrollado para el proceso de selección de Interseguro

@@ -1,0 +1,30 @@
+# ETAPA 1: Construcción (Builder)
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+# Copiamos dependencias
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copiamos el código
+COPY . .
+
+# Compilamos el binario llamado "main"
+RUN go build -o main cmd/api/main.go
+
+# ETAPA 2: Ejecución (Runner) - Imagen ligera
+FROM alpine:latest
+
+WORKDIR /root/
+
+# Copiamos solo el binario desde la etapa anterior
+COPY --from=builder /app/main .
+# Copiamos el .env para que funcione la carga de variables
+COPY .env .
+
+# Exponemos el puerto 8080
+EXPOSE 8080
+
+# Ejecutamos el binario
+CMD ["./main"]

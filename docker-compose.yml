@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Servicio de Estadísticas (Node)
+  node-api:
+    build: ./node-api
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  # Servicio Principal (Go)
+  go-api:
+    build: ./go-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - node-api # Espera a que Node inicie
+    environment:
+      - NODE_SERVICE_URL=http://node-api:3000/api # <--- LA MAGIA: Nombre del servicio
+      - JWT_SECRET=secreto_para_firmar_tokens
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password123
+    networks:
+      - app-network
+
+# Definimos una red privada para que se comuniquen
+networks:
+  app-network:
+    driver: bridge
